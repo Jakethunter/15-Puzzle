@@ -176,32 +176,67 @@ public:
         return (a.x >= 0 && a.x <= 3 && a.y >= 0 && a.y <= 3);
     }
 
-    void Swap(Point& a, Point& b){
-        Point newPoint{a};
+    void Swap(Tile& a, Tile& b){
+        Tile newPoint{a};
         a = b;
         b = newPoint;
     }
-
-    bool movetile(){
-        
-
-    }
-
-
-
-    
     Point FindEmpty(){
         for (size_t i = 0; i < 4; i++){
             for (size_t t = 0; t < 4; t++){
                 if(this->m_array[i][t] == Tile{0}){
-                    return {i, t};
+                    return { static_cast<int>(t), static_cast<int>(i)};
                 }
-                
             }
+        }
+        assert (false);
+        return{-1, -1};
     }
-    
+
+        bool movetile(Direction d){
+        Point zero{FindEmpty()};
+        std::cout << zero.x << zero.y;
+        Point adj = zero.getAdjacentPoint(-d);
+        if (checkValid(adj) == true) {
+            Swap(m_array[zero.y][zero.x], m_array[adj.y][adj.x]);
+             return true;
+        } else {
+            return false;
+        }
+        return false;
     }
-};
+        void randomize(){
+            for (size_t i = 0; i < Random::get(500, 1000); i++)
+            {
+                movetile(Direction::random());
+            }
+            
+        }
+        bool GameWon(){
+            Board winningBoard;
+            int correctCount{0};
+            for (size_t i = 0; i < 4; i++)
+            {
+                for (size_t t = 0; t < 4; t++)
+                {
+                    if (winningBoard.m_array[i][t] == this->m_array[i][t])
+                    {
+                        correctCount++;
+                    }
+                    
+                }
+            }
+            if (correctCount == 16)
+            {
+                return true;
+            } else {
+                return false;
+            }
+            
+            
+        }
+    };
+
 
 
 namespace UserInput {
@@ -220,8 +255,8 @@ char getCommandFromUser(){
 
 void playGame(){
     Board game;
+    game.randomize();
     std::cout << game;
-
 
    char command{};
    while (true)
@@ -248,6 +283,13 @@ void playGame(){
     default:
         break;
     }
+    game.movetile(Direction{command});
+    std::cout << game;
+    if (game.GameWon()) {
+        std::cout << "Game Won!";
+        return;
+    }
+    
     }
     }
 
